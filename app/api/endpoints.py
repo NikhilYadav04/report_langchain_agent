@@ -30,25 +30,37 @@ async def upload_pdf(user_id: str = Form(...), file: UploadFile = File(...)):
 
     # Save uploaded file temporarily
     try:
+        # Save uploaded file temporarily
         with temp_path.open("wb") as buffer:
             shutil.copyfileobj(file.file, buffer)
-    finally:
         file.file.close()
 
-    # Process and create vector store
-    print(f"Processing upload for user {user_id}...")
-    success = vector_store.create_vector_store(user_id, temp_path)
+        # Process and create vector store
+        print(f"Processing upload for user {user_id}...")
+        success = vector_store.create_vector_store(user_id, temp_path)
 
-    if success:
-        return UploadResponse(
-            user_id=user_id,
-            filename=file.filename,
-            message="Report processed and indexed successfully.",
-        )
-    else:
+        if success:
+            return UploadResponse(
+                user_id=user_id,
+                filename=file.filename,
+                message="Report processed and indexed successfully.",
+            )
+        else:
+            raise HTTPException(
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                detail={
+                    "message": "Failed to process and index the PDF.",
+                    "error": "Vector store returned False.",
+                },
+            )
+
+    except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Failed to process and index the PDF.",
+            detail={
+                "message": "An unexpected error occurred while processing the PDF.",
+                "error": str(e),
+            },
         )
 
 
