@@ -1,0 +1,26 @@
+# -------------------- Core Backend --------------------
+fastapi==0.115.0
+uvicorn[standard]==0.32.1
+python-dotenv==1.1.1
+python-multipart==0.0.19
+
+# -------------------- LangChain Stack --------------------
+langchain==0.3.27
+langchain-core==0.3.76
+langchain-community==0.3.29
+langchain-google-genai==2.0.10
+langchain-text-splitters==0.3.11
+pydantic==2.11.9
+ddgs==9.6.0
+
+gunicorn==22.0.0
+
+# -------------------- PDF & OCR --------------------
+pdfplumber==0.11.7
+ocrmypdf==16.11.1         # (if you use OCR; not in your list, safe to add)
+
+# -------------------- Vector Store --------------------
+faiss-cpu==1.9.0.post1    # (or latest compatible, if not yet installed)
+
+# -------------------- Tools & Utilities --------------------
+duckduckgo-search==6.3.7
