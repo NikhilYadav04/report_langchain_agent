@@ -126,6 +126,6 @@ def get_retriever(user_id: str) -> VectorStoreRetriever | None:
     if vectorstore:
         # You can customize search_type and search_kwargs here if needed
         # e.g., return vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
-        return vectorstore.as_retriever()
+        return vectorstore.as_retriever(search_type="mmr", search_kwargs={"k": 5})
     else:
         return None

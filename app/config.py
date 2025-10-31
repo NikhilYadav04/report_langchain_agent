@@ -8,15 +8,15 @@ GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
     raise ValueError("GOOGLE_API_KEY not found in .env file.")
 
-# --- Directory Setup (Ephemeral for Render Free Tier) ---
-# Use the /tmp directory, which is writeable by www-data.
-# THIS IS NOT PERSISTENT. Data will be lost.
-DATA_DIR = Path("/tmp")
+# --- Directory Setup (FOR RAILWAY) ---
+# We get the path "/data" from the DATA_DIR env var.
+# This path is our persistent volume.
+DATA_DIR = Path(os.getenv("DATA_DIR", "."))
 
 FAISS_INDEX_DIR = DATA_DIR / "faiss_indexes"
 TEMP_UPLOAD_DIR = DATA_DIR / "temp_uploads"
 
-# Ensure these directories exist
+# Ensure these directories exist on the persistent disk
 FAISS_INDEX_DIR.mkdir(exist_ok=True)
 TEMP_UPLOAD_DIR.mkdir(exist_ok=True)
 
