@@ -25,6 +25,10 @@ async def upload_pdf(user_id: str = Form(...), file: UploadFile = File(...)):
             detail="Invalid file type. Only PDF allowed.",
         )
 
+    # Ensure the temporary upload directory exists
+    TEMP_UPLOAD_DIR.mkdir(exist_ok=True)
+    # ---
+
     # Use a unique name for the temp file to avoid conflicts
     temp_path = TEMP_UPLOAD_DIR / f"{user_id}_{file.filename}"
 

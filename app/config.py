@@ -16,9 +16,6 @@ DATA_DIR = Path(os.getenv("DATA_DIR", "."))
 FAISS_INDEX_DIR = DATA_DIR / "faiss_indexes"
 TEMP_UPLOAD_DIR = DATA_DIR / "temp_uploads"
 
-# Ensure these directories exist on the persistent disk
-FAISS_INDEX_DIR.mkdir(exist_ok=True)
-TEMP_UPLOAD_DIR.mkdir(exist_ok=True)
 
 
 # import os

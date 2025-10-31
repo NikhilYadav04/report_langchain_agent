@@ -32,6 +32,11 @@ def get_faiss_path(user_id: str) -> Path:
 
 def create_vector_store(user_id: str, pdf_path: Path) -> bool:
     """Processes a PDF and creates a new FAISS vector store for the user."""
+
+    # Ensure the parent directory exists right before we use it.
+    FAISS_INDEX_DIR.mkdir(exist_ok=True)
+    # ---
+
     index_path = get_faiss_path(user_id)
 
     # Clear any old index for this user
