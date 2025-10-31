@@ -1,0 +1,15 @@
+# Start from a standard Python 3.10 image
+FROM python:3.10-slim
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Install Tesseract-OCR (This will work inside Docker)
+RUN apt-get update && apt-get install -y tesseract-ocr
+
+# Copy your requirements file and install all Python packages
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copy the rest of your application code into the container
+COPY . .
