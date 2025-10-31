@@ -7,6 +7,11 @@ WORKDIR /app
 # Install Tesseract-OCR
 RUN apt-get update && apt-get install -y tesseract-ocr
 
+# --- ADD THIS LINE ---
+# Create the /data mount point
+RUN mkdir -p /data
+# ---
+
 # Copy your requirements file and install all Python packages
 COPY requirements.txt .
 RUN pip install -r requirements.txt
