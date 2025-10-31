@@ -1,23 +1,20 @@
+# app/config.py
 import os
 from dotenv import load_dotenv
 from pathlib import Path
 
-# Load environment variables from .env file
-env_path = Path('.') / '.env'
-load_dotenv(dotenv_path=env_path)
-
-# --- API Keys ---
+# ... (your API key loading) ...
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
-    raise ValueError("GOOGLE_API_KEY not found in .env file. Please create a .env file.")
+    raise ValueError("GOOGLE_API_KEY not found in .env file.")
 
-# --- Directory Setup ---
-# Base directory of the project (i.e., /health_rag_agent/)
-BASE_DIR = Path(__file__).resolve().parent.parent
+# --- Directory Setup (Ephemeral for Render Free Tier) ---
+# Use the /tmp directory, which is writeable by www-data.
+# THIS IS NOT PERSISTENT. Data will be lost.
+DATA_DIR = Path("/tmp")
 
-# Define directories for storing data
-FAISS_INDEX_DIR = BASE_DIR / "faiss_indexes"
-TEMP_UPLOAD_DIR = BASE_DIR / "temp_uploads"
+FAISS_INDEX_DIR = DATA_DIR / "faiss_indexes"
+TEMP_UPLOAD_DIR = DATA_DIR / "temp_uploads"
 
 # Ensure these directories exist
 FAISS_INDEX_DIR.mkdir(exist_ok=True)

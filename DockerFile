@@ -14,5 +14,8 @@ RUN pip install -r requirements.txt
 # Copy the rest of your application code into the container
 COPY . .
 
-# NEW LINE: This is your "Start Command"
+# Set the user to www-data so it has write permissions to /tmp
+USER www-data
+
+# This is your "Start Command"
 CMD gunicorn -w 4 -k uvicorn.workers.UvicornWorker app.main:app --bind 0.0.0.0:$PORT
