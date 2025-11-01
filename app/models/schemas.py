@@ -9,7 +9,7 @@ class QueryRequest(BaseModel):
 class QueryResponse(BaseModel):
 
     query: str
-    data: str
+    message: str
     statusCode: int
 
 

@@ -84,7 +84,7 @@ async def query_agent(request: QueryRequest, response: Response):
     response.status_code = response_dict["code"]
     return QueryResponse(
         query=request.query,
-        data=response_dict["message"],
+        message=response_dict["message"],
         statusCode=response_dict["code"],
     )
 
