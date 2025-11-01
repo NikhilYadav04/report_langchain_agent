@@ -1,6 +1,6 @@
 from app.config import GOOGLE_API_KEY
 from app.services.vector_store import load_vector_store
-
+from fastapi import Response, status
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langchain.agents import create_react_agent, AgentExecutor
 from langchain import hub
@@ -129,7 +129,7 @@ Your task:
 # --- 4. Main Query Function ---
 
 
-def run_agent_query(user_id: str, query: str) -> str:
+def run_agent_query(user_id: str, query: str) -> dict:
     """
     Runs the full RAG-then-Agent workflow:
     1. Fetches the user's retriever.
@@ -143,7 +143,10 @@ def run_agent_query(user_id: str, query: str) -> str:
     # Step 1: Load the retriever (as requested from Cell 114)
     retriever = get_retriever(user_id)
     if not retriever:
-        return f"I'm sorry, but I couldn't find a health report for user {user_id}. Please upload one first."
+        return {
+            "code": status.HTTP_404_NOT_FOUND,
+            "message": f"I'm sorry, but I couldn't find a health report for user {user_id}. Please upload one first.",
+        }
 
     print(f"✅ Retriever loaded for {user_id}")
 
@@ -162,7 +165,10 @@ def run_agent_query(user_id: str, query: str) -> str:
 
     except Exception as e:
         print(f"❌ Error during retrieval: {e}")
-        return "I'm sorry, I encountered an error while retrieving your health data."
+        return {
+            "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+            "message": "I'm sorry, I encountered an error while retrieving your health data.",
+        }
 
     # Step 3: Format the prompt with fetched data (as requested from Cell 123)
     try:
@@ -178,7 +184,10 @@ def run_agent_query(user_id: str, query: str) -> str:
 
     except Exception as e:
         print(f"❌ Error formatting prompt: {e}")
-        return "I'm sorry, I encountered an error while preparing your query."
+        return {
+            "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+            "message": "I'm sorry, I encountered an error while preparing your query.",
+        }
 
     # Step 4: Invoke the agent with the RAG-filled prompt (as requested)
     try:
@@ -187,8 +196,14 @@ def run_agent_query(user_id: str, query: str) -> str:
         )
 
         print(f"✅ Agent execution complete.")
-        return response["output"]
+        return {
+            "code": status.HTTP_200_OK,
+            "message": response["output"],
+        }
 
     except Exception as e:
         print(f"❌ Error during agent execution: {e}")
-        return "I'm sorry, I encountered an error while processing your request."
+        return {
+            "code": status.HTTP_500_INTERNAL_SERVER_ERROR,
+            "message": f"I'm sorry, I encountered an error while processing your request : {e}.",
+        }

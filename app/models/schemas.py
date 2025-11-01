@@ -7,15 +7,17 @@ class QueryRequest(BaseModel):
 
 
 class QueryResponse(BaseModel):
-    user_id: str
+
     query: str
-    response: str
+    data: str
+    statusCode: int
 
 
 class UploadResponse(BaseModel):
-    user_id: str
+
     filename: str
     message: str
+    statusCode: int
 
 
 class DeleteRequest(BaseModel):
@@ -23,8 +25,9 @@ class DeleteRequest(BaseModel):
 
 
 class DeleteResponse(BaseModel):
-    user_id: str
+
     message: str
+    statusCode: int
 
 
 class DeleteAllResponse(BaseModel):
@@ -32,3 +35,4 @@ class DeleteAllResponse(BaseModel):
 
     message: str
     path_cleared: str
+    statusCode: int

@@ -25,16 +25,18 @@ TEMP_UPLOAD_DIR = DATA_DIR / "temp_uploads"
 # from pathlib import Path
 
 # # pass
-# ADMIN = os.getenv()
+# ADMIN = os.getenv("ADMIN")
 
 # # Load environment variables from .env file
-# env_path = Path('.') / '.env'
+# env_path = Path(".") / ".env"
 # load_dotenv(dotenv_path=env_path)
 
 # # --- API Keys ---
 # GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 # if not GOOGLE_API_KEY:
-#     raise ValueError("GOOGLE_API_KEY not found in .env file. Please create a .env file.")
+#     raise ValueError(
+#         "GOOGLE_API_KEY not found in .env file. Please create a .env file."
+#     )
 
 # # --- Directory Setup ---
 # # Base directory of the project (i.e., /health_rag_agent/)

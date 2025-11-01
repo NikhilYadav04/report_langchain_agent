@@ -1,4 +1,4 @@
-from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status
+from fastapi import APIRouter, UploadFile, File, Form, HTTPException, status, Response
 from app.models.schemas import (
     QueryRequest,
     QueryResponse,
@@ -16,15 +16,20 @@ router = APIRouter()
 
 
 @router.post("/upload", response_model=UploadResponse)
-async def upload_pdf(user_id: str = Form(...), file: UploadFile = File(...)):
+async def upload_pdf(
+    response: Response, user_id: str = Form(...), file: UploadFile = File(...)
+):
     """
     Uploads a PDF report, processes it with OCR, and creates a
     user-specific vector store.
     """
     if not file.filename or not file.filename.endswith(".pdf"):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Invalid file type. Only PDF allowed.",
+
+        response.status_code = status.HTTP_400_BAD_REQUEST
+        return UploadResponse(
+            statusCode=400,
+            filename="",
+            message="Invalid file type. Only PDF allowed..",
         )
 
     # Ensure the temporary upload directory exists
@@ -47,44 +52,45 @@ async def upload_pdf(user_id: str = Form(...), file: UploadFile = File(...)):
 
         if success:
             return UploadResponse(
-                user_id=user_id,
                 filename=file.filename,
+                statusCode=200,
                 message="Report processed and indexed successfully.",
             )
         else:
-            raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail={
-                    "message": "Failed to process and index the PDF.",
-                    "error": "Vector store returned False.",
-                },
+            response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+            return UploadResponse(
+                filename=file.filename,
+                statusCode=500,
+                message="Failed to process and index the PDF.",
             )
 
     except Exception as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail={
-                "message": "An unexpected error occurred while processing the PDF.",
-                "error": str(e),
-            },
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return UploadResponse(
+            filename=file.filename,
+            statusCode=500,
+            message=f"Server Error : {e}",
         )
 
 
 @router.post("/query", response_model=QueryResponse)
-async def query_agent(request: QueryRequest):
+async def query_agent(request: QueryRequest, response: Response):
     """
     Sends a query to the LangChain agent, which will use the
     user's indexed report to answer.
     """
     print(f"Received query from {request.user_id}: {request.query}")
-    response_text = agent_service.run_agent_query(request.user_id, request.query)
+    response_dict = agent_service.run_agent_query(request.user_id, request.query)
+    response.status_code = response_dict["code"]
     return QueryResponse(
-        user_id=request.user_id, query=request.query, response=response_text
+        query=request.query,
+        data=response_dict["message"],
+        statusCode=response_dict["code"],
     )
 
 
 @router.delete("/delete_index", response_model=DeleteResponse)
-async def delete_index(request: DeleteRequest):
+async def delete_index(request: DeleteRequest, response: Response):
     """
     Deletes the FAISS index folder associated with a user_id.
     """
@@ -92,19 +98,18 @@ async def delete_index(request: DeleteRequest):
     success = vector_store.delete_vector_store(request.user_id)
 
     if success:
-        return DeleteResponse(
-            user_id=request.user_id, message="User index deleted successfully."
-        )
+        return DeleteResponse(message="User index deleted successfully", statusCode=200)
     else:
         # This can mean it failed OR it didn't exist, which is still a "success"
+        response.status_code = status.HTTP_400_BAD_REQUEST
         return DeleteResponse(
-            user_id=request.user_id,
+            statusCode=400,
             message="User index not found or could not be deleted.",
         )
 
 
 @router.delete("/delete/all", response_model=DeleteAllResponse)
-async def delete_all(key: str):
+async def delete_all(key: str, response: Response):
     """
     Deletes ALL FAISS index folders by recursively deleting the main
     storage directory and then recreating it.
@@ -113,9 +118,11 @@ async def delete_all(key: str):
     try:
 
         if key != ADMIN:
-            raise HTTPException(
+            response.status_code = status.HTTP_400_BAD_REQUEST
+            return DeleteAllResponse(
                 status_code=400,
-                detail=f"Invalid Key",
+                path_cleared="",
+                message=f"Invalid Key => {key}",
             )
         # 1. Get the base path
         # We find the parent directory of where user indexes are stored.
@@ -126,9 +133,11 @@ async def delete_all(key: str):
 
         if not base_path:
             print(f"Base index directory not found: {base_path}")
+            response.status_code = status.HTTP_400_BAD_REQUEST
             return DeleteAllResponse(
                 message="Base index directory not found. Nothing to delete.",
                 path_cleared=str(base_path),
+                statusCode=400,
             )
 
         # 2. Delete the entire directory tree
@@ -142,14 +151,16 @@ async def delete_all(key: str):
 
         return DeleteAllResponse(
             message="All user indices have been deleted successfully.",
+            statusCode=200,
             path_cleared=str(base_path),
         )
-    except HTTPException as http_exc:
-        raise http_exc
 
     except Exception as e:
         print(f"Error during delete_all operation: {e}")
         # Return a 500 server error
-        raise HTTPException(
-            status_code=500, detail=f"An error occurred while deleting all indices: {e}"
+        response.status_code = status.HTTP_500_INTERNAL_SERVER_ERROR
+        return DeleteAllResponse(
+            statusCode=500,
+            message=f"An error occurred while deleting all indices: {e}",
+            path_cleared="",
         )
