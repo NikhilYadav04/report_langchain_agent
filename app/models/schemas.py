@@ -25,3 +25,10 @@ class DeleteRequest(BaseModel):
 class DeleteResponse(BaseModel):
     user_id: str
     message: str
+
+
+class DeleteAllResponse(BaseModel):
+    """Response model for the delete_all endpoint."""
+
+    message: str
+    path_cleared: str

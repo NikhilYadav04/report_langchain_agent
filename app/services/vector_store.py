@@ -27,6 +27,10 @@ def get_faiss_path(user_id: str) -> Path:
     return FAISS_INDEX_DIR / f"faiss_index_{user_id}"
 
 
+def get_parent_faiss_path() -> Path:
+    return FAISS_INDEX_DIR
+
+
 # --- Core Service Functions ---
 
 

@@ -17,7 +17,6 @@ FAISS_INDEX_DIR = DATA_DIR / "faiss_indexes"
 TEMP_UPLOAD_DIR = DATA_DIR / "temp_uploads"
 
 
-
 # import os
 # from dotenv import load_dotenv
 # from pathlib import Path

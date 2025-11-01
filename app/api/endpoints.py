@@ -5,6 +5,7 @@ from app.models.schemas import (
     UploadResponse,
     DeleteRequest,
     DeleteResponse,
+    DeleteAllResponse
 )
 from app.services import vector_store, agent_service
 from app.config import TEMP_UPLOAD_DIR
@@ -98,4 +99,48 @@ async def delete_index(request: DeleteRequest):
         return DeleteResponse(
             user_id=request.user_id,
             message="User index not found or could not be deleted.",
+        )
+
+
+@router.delete("/delete/all", response_model=DeleteAllResponse)
+async def delete_all():
+    """
+    Deletes ALL FAISS index folders by recursively deleting the main
+    storage directory and then recreating it.
+    """
+    print("Received request to delete ALL user indices.")
+    try:
+        # 1. Get the base path
+        # We find the parent directory of where user indexes are stored.
+        # This assumes get_faiss_path(id) returns something like /app/storage/user_id
+        # so .parent gives us /app/storage
+        base_path = vector_store.get_parent_faiss_path()
+        print(base_path)
+
+        if not base_path:
+            print(f"Base index directory not found: {base_path}")
+            return DeleteAllResponse(
+                message="Base index directory not found. Nothing to delete.",
+                path_cleared=str(base_path),
+            )
+
+        # 2. Delete the entire directory tree
+        print(f"Deleting directory: {base_path}")
+        shutil.rmtree(base_path)
+
+        # 3. CRITICAL: Recreate the base directory
+        # If you don't do this, future attempts to save indexes will fail.
+        base_path.mkdir(parents=True, exist_ok=True)
+        print(f"Recreated empty directory: {base_path}")
+
+        return DeleteAllResponse(
+            message="All user indices have been deleted successfully.",
+            path_cleared=str(base_path),
+        )
+
+    except Exception as e:
+        print(f"Error during delete_all operation: {e}")
+        # Return a 500 server error
+        raise HTTPException(
+            status_code=500, detail=f"An error occurred while deleting all indices: {e}"
         )
