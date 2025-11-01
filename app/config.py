@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from pathlib import Path
 
 # pass
-ADMIN = os.getenv()
+ADMIN = os.getenv('ADMIN')
 
 # ... (your API key loading) ...
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
