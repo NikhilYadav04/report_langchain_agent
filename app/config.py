@@ -3,6 +3,9 @@ import os
 from dotenv import load_dotenv
 from pathlib import Path
 
+# pass
+ADMIN = os.getenv()
+
 # ... (your API key loading) ...
 GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
 if not GOOGLE_API_KEY:
@@ -20,6 +23,9 @@ TEMP_UPLOAD_DIR = DATA_DIR / "temp_uploads"
 # import os
 # from dotenv import load_dotenv
 # from pathlib import Path
+
+# # pass
+# ADMIN = os.getenv()
 
 # # Load environment variables from .env file
 # env_path = Path('.') / '.env'

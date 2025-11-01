@@ -5,10 +5,11 @@ from app.models.schemas import (
     UploadResponse,
     DeleteRequest,
     DeleteResponse,
-    DeleteAllResponse
+    DeleteAllResponse,
 )
 from app.services import vector_store, agent_service
 from app.config import TEMP_UPLOAD_DIR
+from app.config import ADMIN
 import shutil
 
 router = APIRouter()
@@ -103,13 +104,19 @@ async def delete_index(request: DeleteRequest):
 
 
 @router.delete("/delete/all", response_model=DeleteAllResponse)
-async def delete_all():
+async def delete_all(key: str):
     """
     Deletes ALL FAISS index folders by recursively deleting the main
     storage directory and then recreating it.
     """
     print("Received request to delete ALL user indices.")
     try:
+
+        if key != ADMIN:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid Key",
+            )
         # 1. Get the base path
         # We find the parent directory of where user indexes are stored.
         # This assumes get_faiss_path(id) returns something like /app/storage/user_id
@@ -137,6 +144,8 @@ async def delete_all():
             message="All user indices have been deleted successfully.",
             path_cleared=str(base_path),
         )
+    except HTTPException as http_exc:
+        raise http_exc
 
     except Exception as e:
         print(f"Error during delete_all operation: {e}")
